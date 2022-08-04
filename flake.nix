@@ -22,21 +22,33 @@
   }:
     with builtins; let
       std = nixpkgs.lib;
-      nixpkgsFor = std.genAttrs systems (system: import nixpkgs {
-        localSystem = system;
-        crossSystem = system;
-        overlays = [ self.overlays.${system} ];
-      });
+      systems = ["x86_64-linux"];
+      nixpkgsFor = std.genAttrs systems (system:
+        import nixpkgs {
+          localSystem = system;
+          crossSystem = system;
+          overlays = [self.overlays.${system}];
+        });
     in {
       formatter = std.mapAttrs (system: pkgs: pkgs.default) inputs.alejandra.packages;
-      overlays = std.genAttrs systems (system: final: prev: {
-        signal-wm = {};
+      overlays = std.genAttrs systems (system: final: prev: let
+        naersk = inputs.naersk.lib.${system}.override {
+          inherit (fenix.packages.${system}.minimal) cargo rustc;
+        };
+      in {
+        signal-wm = naersk.buildPackage {
+          src = ./.;
+        };
       });
-      packages = std.genAttrs systems (system: let pkgs = nixpkgsFor.${system}; in {
+      packages = std.genAttrs systems (system: let
+        pkgs = nixpkgsFor.${system};
+      in {
         signal-wm = pkgs.signal-wm;
         default = self.packages.${system}.signal-wm;
       });
-      apps = std.genAttrs systems (system: let pkgs = nixpkgsFor.${system}; in {
-      });
+      # apps = std.genAttrs systems (system: let
+      #   pkgs = nixpkgsFor.${system};
+      # in {
+      # });
     };
 }
