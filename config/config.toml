@@ -1,0 +1,5 @@
+[server]
+name = "SignalWM"
+
+[server.graphics]
+vfr = false

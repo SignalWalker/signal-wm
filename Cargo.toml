@@ -6,4 +6,57 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-smithay = { version = "^0.3" }
+
+# smithay = { version = "^0.3", default_features = false, features = [] }
+wayland-server = { version = "^0.29", features = [] }
+wayland-egl = { version = "^0.29", optional = true }
+wayland-cursor = { version = "^0.29" }
+wayland-protocols = { version = "^0.29", features = [ "server" ] }
+wayland-protocols-misc = { version = "0.1.0-beta.8", features = [ "server" ], optional = true }
+wayland-protocols-wlr = { version = "0.1.0-beta.8", features = [ "server" ], optional = true }
+wayland-protocols-plasma = { version = "0.1.0-beta.8", features = [ "server" ], optional = true }
+
+signal-hook = { version = "^0.3" }
+
+winit = { version = "^0.27", optional = true, default-features = false }
+
+clap = { version = "^3", features = [ "derive", "env" ] }
+
+tracing = "^0.1"
+tracing-core = "^0.1"
+tracing-subscriber = { version = "^0.3", features = [ "time", "env-filter", "parking_lot", "local-time", "json" ] }
+
+thiserror = "^1"
+
+lazy_static = "^1"
+
+directories = "^4"
+
+serde = { version = "^1", features = [ "derive" ] }
+toml = "^0.5"
+
+time = { version = "^0.3", features = ["formatting", "local-offset", "macros"] }
+
+wgpu = { version = "^0.13" }
+
+[features]
+default = [ "xwayland", "egl", "winit-wayland", "winit-x11", "protocols-unstable", "protocols-staging", "protocols-misc", "protocols-wlr", "protocols-plasma" ]
+
+dlopen = [ "wayland-server/dlopen" ]
+
+winit = [ "dep:winit" ]
+winit-wayland = [ "winit", "winit/wayland", "winit/wayland-dlopen", "dlopen", "winit/wayland-csd-adwaita" ]
+winit-x11 = [ "winit", "winit/x11" ]
+
+xwayland = []
+egl = [ "dep:wayland-egl", "wayland-server/use_system_lib" ]
+
+protocols-unstable = [ "wayland-protocols/unstable_protocols" ]
+protocols-staging = [ "wayland-protocols/staging_protocols" ]
+protocols-misc = [ "dep:wayland-protocols-misc" ]
+protocols-wlr = [ "dep:wayland-protocols-wlr" ]
+protocols-plasma = [ "dep:wayland-protocols-plasma" ]
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rustix = { version = "^0.35", features = [ "process" ] }
+nix = { version = "^0.24", features = [ "poll" ] }

@@ -1,5 +1,5 @@
 {
-  description = "A dynamic, tiling Wayland compositor, designed for efficiency and low latency.";
+  description = "A dynamic Wayland compositor, designed for efficiency and low latency. Built with Rust and WGPU.";
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
     alejandra = {
@@ -33,11 +33,12 @@
       formatter = std.mapAttrs (system: pkgs: pkgs.default) inputs.alejandra.packages;
       overlays = std.genAttrs systems (system: final: prev: let
         naersk = inputs.naersk.lib.${system}.override {
-          inherit (fenix.packages.${system}.minimal) cargo rustc;
+          inherit (inputs.fenix.packages.${system}.minimal) cargo rustc;
         };
       in {
         signal-wm = naersk.buildPackage {
           src = ./.;
+          nativeBuildInputs = with final; [ pkg-config dbus udev ];
         };
       });
       packages = std.genAttrs systems (system: let
